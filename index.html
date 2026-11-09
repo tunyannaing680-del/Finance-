@@ -50,7 +50,7 @@ details .two,details>div{margin-top:8px}
 .item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:6px}
 .item small{color:var(--mute);display:block;line-height:1.4}
 .amt{font-weight:700;white-space:nowrap}
-.amt.income,.amt.hotel{color:var(--inc)}.amt.expense{color:var(--exp)}.amt.remit{color:var(--rem)}
+.amt.income{color:var(--inc)}.amt.hotel{color:var(--mute)}.amt.expense{color:var(--exp)}.amt.remit{color:var(--rem)}
 .del{border:0;background:none;color:var(--mute);font-size:20px;cursor:pointer;padding:4px 8px}
 .empty{color:var(--mute);text-align:center;padding:20px}
 .cat{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
@@ -91,7 +91,7 @@ details .two,details>div{margin-top:8px}
 <label class="f">Twin (UB သာ)<input id="rut" type="number" inputmode="numeric" min="0" placeholder="0"></label>
 </div>
 <label class="f">အလုပ်လုပ်ခဲ့တဲ့ နာရီ (မထည့်လည်းရ)<input id="hrs" type="number" inputmode="decimal" min="0" step="0.5" placeholder="ဥပမာ 3.5"></label>
-<div class="prev">ဒီနေ့ ခန်းလုပ်ခ: <b id="prev">¥0</b> <small>(ခန်းလုပ်ခသာ)</small></div>
+<div class="prev">ဒီနေ့ ခန်းလုပ်ခ: <b id="prev">¥0</b> <small>(နောက်လမှ ရမယ်)</small></div>
 </div>
 <input id="note" type="text" placeholder="မှတ်ချက် (မထည့်လည်းရ)" aria-label="မှတ်ချက်">
 <button class="add" id="add" type="button">စာရင်းထည့်မယ်</button>
@@ -103,7 +103,7 @@ details .two,details>div{margin-top:8px}
 <details>
 <summary>လစာစာရွက်နဲ့ ယှဉ်ကြည့်ရန်</summary>
 <div class="two">
-<label class="f">စာရွက်ပါ ခန်းလုပ်ခ စုစုပေါင်း (¥)<input id="pg" type="number" inputmode="numeric" min="0"></label>
+<label class="f">ဒီလ လုပ်ခဲ့တာအတွက် စာရွက်ပါ ခန်းလုပ်ခ (¥)<input id="pg" type="number" inputmode="numeric" min="0"></label>
 </div>
 <div><button class="btn2" id="psave" type="button">သိမ်းမယ်</button></div>
 <div id="pres"></div>
@@ -167,19 +167,22 @@ var rows=data.filter(function(x){return x.date.slice(0,7)===m}).sort(function(a,
 var tin=0,tex=0,trm=0,by={};
 var H={d:{},s:0,t:0,us:0,ut:0,hrs:0,amt:0,any:false};
 rows.forEach(function(x){
-if(x.type==="income"||x.type==="hotel")tin+=x.amount;
+if(x.type==="income")tin+=x.amount;
 else if(x.type==="remit")trm+=x.amount;
-else{tex+=x.amount;by[x.cat]=(by[x.cat]||0)+x.amount}
+else if(x.type!=="hotel"){tex+=x.amount;by[x.cat]=(by[x.cat]||0)+x.amount}
 if(x.type==="hotel"){var r=x.rooms||{};H.any=true;H.d[x.date]=1;H.s+=r.s||0;H.t+=r.t||0;H.us+=r.us||0;H.ut+=r.ut||0;H.hrs+=x.hours||0;H.amt+=x.amount}
 });
+var pd=new Date(+m.slice(0,4),+m.slice(5,7)-2,1),pk=pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0"),ph=0;
+data.forEach(function(x){if(x.type==="hotel"&&x.date.slice(0,7)===pk)ph+=x.amount});
+tin+=ph;
 $("bal").textContent=yen(tin-tex-trm);$("tin").textContent=yen(tin);$("tex").textContent=yen(tex);$("trm").textContent=yen(trm);
 var hb=$("hotbox");
-if(!H.any){hb.classList.add("hide")}else{
+if(!H.any&&!ph){hb.classList.add("hide")}else{
 hb.classList.remove("hide");
 var nd=Object.keys(H.d).length,nr=H.s+H.t+H.us+H.ut;
-var L=[["အလုပ်ဆင်းရက်",nd+" ရက်"],
-["ခန်းစုစုပေါင်း",nr+" ခန်း (Single "+H.s+", Twin "+H.t+", UB Single "+H.us+", UB Twin "+H.ut+")"],
-["ခန်းလုပ်ခ စုစုပေါင်း",yen(H.amt)]];
+var L=[];
+if(ph)L.push(["ပြီးခဲ့တဲ့လ လုပ်ခ (ဒီလ ရတယ်)",yen(ph)]);
+if(H.any){L.push(["အလုပ်ဆင်းရက်",nd+" ရက်"]);L.push(["ခန်းစုစုပေါင်း",nr+" ခန်း (Single "+H.s+", Twin "+H.t+", UB Single "+H.us+", UB Twin "+H.ut+")"]);L.push(["ဒီလ လုပ်ခဲ့တဲ့ ခန်းလုပ်ခ (နောက်လ ရမယ်)",yen(H.amt)])}
 var warn=false;
 if(H.hrs>0){var hr=H.amt/H.hrs;warn=hr<MINW;L.push(["နာရီ",H.hrs+" နာရီ၊ တစ်နာရီပျမ်းမျှ "+yen(hr)])}
 var h="";L.forEach(function(r){h+='<div class="r"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>'});
@@ -195,41 +198,5 @@ var cats=Object.keys(by).sort(function(a,b){return by[b]-by[a]}),ch=$("cats");ch
 if(!cats.length)ch.innerHTML='<div class="empty">သုံးငွေ မရှိသေးပါ</div>';
 cats.forEach(function(c){var d=document.createElement("div");d.innerHTML='<div class="cat"><span></span><b>'+yen(by[c])+'</b></div><div class="track"><i style="width:'+Math.round(by[c]/tex*100)+'%"></i></div>';d.querySelector("span").textContent=c;ch.appendChild(d)});
 var L2=$("list");L2.innerHTML="";
-if(!rows.length)L2.innerHTML='<div class="empty">ဒီလအတွက် မှတ်တမ်း မရှိသေးပါ။ အပေါ်က ဖောင်မှာ ထည့်ပါ။</div>';
-rows.forEach(function(x){var d=document.createElement("div");d.className="item";
-d.innerHTML='<div><span class="t"></span><small></small></div><div style="display:flex;align-items:center"><span class="amt '+x.type+'"></span><button class="del" aria-label="ဖျက်မယ်">×</button></div>';
-d.querySelector(".t").textContent=x.type==="hotel"?"ဟော်တယ်":x.cat;
-d.querySelector("small").textContent=x.date.slice(5).replace("-","/")+(x.type==="hotel"?", "+roomText(x):"")+(x.note?" - "+x.note:"");
-d.querySelector(".amt").textContent=((x.type==="income"||x.type==="hotel")?"+":"-")+yen(x.amount);
-d.querySelector(".del").onclick=function(){if(confirm("ဒီမှတ်တမ်းကို ဖျက်မလား?")){data=data.filter(function(y){return y.id!==x.id});sv(KEY,data);render()}};
-L2.appendChild(d)})}
-$("add").onclick=function(){
-var dt=$("date").value||today(),note=$("note").value.trim();
-if(type==="hotel"){
-var dup=data.some(function(x){return x.type==="hotel"&&x.date===dt});
-if(dup&&!confirm("ဒီရက်အတွက် ဟော်တယ်မှတ်တမ်း ရှိပြီးသားပါ။ ထပ်ထည့်မလား?"))return;
-var rm=rd();
-data.push({id:Date.now(),type:"hotel",amount:calc(rm,rates),cat:"ဟော်တယ်",note:note,date:dt,rooms:rm,hours:num("hrs"),rates:Object.assign({},rates)});
-["rs","rt","rus","rut","hrs"].forEach(function(i){$(i).value=""});upd();
-}else{
-var a=parseFloat($("amount").value);
-if(!(a>0)){$("amount").focus();return}
-data.push({id:Date.now(),type:type,amount:a,cat:$("cat").value,note:note,date:dt});
-$("amount").value=""}
-$("note").value="";sv(KEY,data);$("month").value=dt.slice(0,7);render()};
-document.querySelectorAll(".seg button").forEach(function(b){b.onclick=function(){setType(b.dataset.t)}});
-["rs","rt","rus","rut"].forEach(function(i){$(i).oninput=upd});
-var RM={r1:"s",r2:"t",r3:"us",r4:"ut"};
-function fillRates(){Object.keys(RM).forEach(function(i){$(i).value=rates[RM[i]]})}
-$("rsave").onclick=function(){var r={};Object.keys(RM).forEach(function(i){r[RM[i]]=num(i)});rates=r;sv(RK,rates);upd();alert("နှုန်းထား သိမ်းပြီးပါပြီ")};
-$("psave").onclick=function(){var m=$("month").value;pay[m]={g:num("pg")};sv(PK,pay);render()};
-$("month").onchange=render;
-data=ld(KEY,[]);if(!Array.isArray(data))data=[];
-rates=Object.assign({},DEF,ld(RK,{}));pay=ld(PK,{});
-fillRates();
-$("date").value=today();$("month").value=today().slice(0,7);setType("expense");render();
-})();
-</script>
-<script>if("serviceWorker" in navigator){var rf=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(rf)return;rf=true;location.reload()});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
-</body>
-</html>
+if(!rows.length&&!ph)L2.innerHTML='<div class="empty">ဒီလအတွက် မှတ်တမ်း မရှိသေးပါ။ အပေါ်က ဖောင်မှာ ထည့်ပါ။</div>';
+if(ph){var q=document.createElement("div");q.className="item";q.innerHTML='<div><span>ဟော်တယ်လ
