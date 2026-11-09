@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ဝင်ငွေ ထွက်ငွေ စာရင်း</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F4C5C">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#EAF0F2;--card:#fff;--ink:#12303A;--mute:#5E7480;--line:#D3DEE3;--inc:#1B7F4F;--exp:#C4440E;--rem:#3B4CCA;--acc:#0F4C5C;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1A1F;--card:#162830;--ink:#E6EFF2;--mute:#8FA7B1;--line:#264049;--inc:#4FD08C;--exp:#FF8A5B;--rem:#8E9BFF;--acc:#3FB0C8;--on:#06151A}}
+:root[data-theme="dark"]{--bg:#0D1A1F;--card:#162830;--ink:#E6EFF2;--mute:#8FA7B1;--line:#264049;--inc:#4FD08C;--exp:#FF8A5B;--rem:#8E9BFF;--acc:#3FB0C8;--on:#06151A}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 "Noto Sans Myanmar","Padauk","Myanmar Text",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:20px;margin:4px 0 12px}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.bar input{flex:1}
+input,select,button{font:inherit;color:var(--ink)}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.bal{background:var(--acc);color:var(--on);border-radius:16px;padding:16px 18px}
+.bal small{opacity:.85;display:block}
+.bal b{font-size:34px;line-height:1.3;display:block}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 16px}
+.s{background:var(--card);border-radius:12px;padding:10px;border-left:4px solid var(--line)}
+.s small{color:var(--mute);display:block;font-size:12px;line-height:1.5}
+.s b{font-size:15px}
+.s.i{border-color:var(--inc)}.s.e{border-color:var(--exp)}.s.r{border-color:var(--rem)}
+.form{background:var(--card);border-radius:16px;padding:14px;display:grid;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{padding:8px 4px;border:1px solid var(--line);background:transparent;border-radius:10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.add{padding:12px;border:0;border-radius:12px;background:var(--acc);color:var(--on);font-weight:700;cursor:pointer}
+h2{font-size:16px;margin:22px 0 8px}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.item small{color:var(--mute);display:block;line-height:1.4}
+.amt{font-weight:700;white-space:nowrap}
+.amt.income{color:var(--inc)}.amt.expense{color:var(--exp)}.amt.remit{color:var(--rem)}
+.del{border:0;background:none;color:var(--mute);font-size:20px;cursor:pointer;padding:4px 8px}
+.empty{color:var(--mute);text-align:center;padding:20px}
+.cat{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.track{height:6px;background:var(--line);border-radius:3px;margin-bottom:4px}
+.track i{display:block;height:100%;background:var(--exp);border-radius:3px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<h1>ဝင်ငွေ ထွက်ငွေ စာရင်း</h1>
+<div class="bar"><input type="month" id="month" aria-label="လ ရွေးရန်"></div>
+
+<div class="bal"><small>ဒီလ လက်ကျန်ငွေ</small><b id="bal">¥0</b></div>
+<div class="row3">
+<div class="s i"><small>ဝင်ငွေ</small><b id="tin">¥0</b></div>
+<div class="s e"><small>သုံးငွေ</small><b id="tex">¥0</b></div>
+<div class="s r"><small>အိမ်လွှဲ</small><b id="trm">¥0</b></div>
+</div>
+
+<div class="form">
+<div class="seg" role="group" aria-label="အမျိုးအစား">
+<button type="button" data-t="expense" aria-pressed="true">သုံးငွေ</button>
+<button type="button" data-t="income" aria-pressed="false">ဝင်ငွေ</button>
+<button type="button" data-t="remit" aria-pressed="false">အိမ်လွှဲ</button>
+</div>
+<div class="two">
+<input id="amount" type="number" inputmode="numeric" min="0" placeholder="ငွေပမာဏ (¥)" aria-label="ငွေပမာဏ">
+<input id="date" type="date" aria-label="ရက်စွဲ">
+</div>
+<select id="cat" aria-label="အမျိုးအစားခွဲ"></select>
+<input id="note" type="text" placeholder="မှတ်ချက် (မထည့်လည်းရ)" aria-label="မှတ်ချက်">
+<button class="add" id="add" type="button">စာရင်းထည့်မယ်</button>
+</div>
+
+<h2>အမျိုးအစားအလိုက် သုံးငွေ</h2>
+<div id="cats"></div>
+
+<h2>မှတ်တမ်း</h2>
+<div id="list"></div>
+</main>
+
+<script>
+(function(){
+var CATS={
+expense:["အစားအသောက်","အိမ်ငှားခ","ခရီးစရိတ်","ဖုန်း / အင်တာနက်","အသေးသုံး","ဆေးဝါး","လျှပ်စစ် / ရေ / ဓာတ်ငွေ့","အခြား"],
+income:["လစာ","အချိန်ပိုလုပ်ခ","အခြားဝင်ငွေ"],
+remit:["အိမ်သို့ လွှဲငွေ"]};
+var LABEL={expense:"သုံးငွေ",income:"ဝင်ငွေ",remit:"အိမ်လွှဲ"};
+var KEY="finance-tracker-v1",type="expense",data=[];
+function $(id){return document.getElementById(id)}
+function load(){try{var r=localStorage.getItem(KEY);if(r)data=JSON.parse(r)||[]}catch(e){data=[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+function yen(n){return "¥"+Math.round(n).toLocaleString("en-US")}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fillCats(){var s=$("cat");s.innerHTML="";CATS[type].forEach(function(c){var o=document.createElement("option");o.textContent=c;o.value=c;s.appendChild(o)})}
+function setType(t){type=t;document.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.t===t)});fillCats()}
+function render(){
+var m=$("month").value,rows=data.filter(function(x){return x.date.slice(0,7)===m}).sort(function(a,b){return b.date<a.date?-1:b.date>a.date?1:b.id-a.id});
+var tin=0,tex=0,trm=0,by={};
+rows.forEach(function(x){if(x.type==="income")tin+=x.amount;else if(x.type==="remit")trm+=x.amount;else{tex+=x.amount;by[x.cat]=(by[x.cat]||0)+x.amount}});
+$("bal").textContent=yen(tin-tex-trm);$("tin").textContent=yen(tin);$("tex").textContent=yen(tex);$("trm").textContent=yen(trm);
+var cats=Object.keys(by).sort(function(a,b){return by[b]-by[a]}),ch=$("cats");ch.innerHTML="";
+if(!cats.length)ch.innerHTML='<div class="empty">သုံးငွေ မရှိသေးပါ</div>';
+cats.forEach(function(c){var d=document.createElement("div");d.innerHTML='<div class="cat"><span></span><b>'+yen(by[c])+'</b></div><div class="track"><i style="width:'+Math.round(by[c]/tex*100)+'%"></i></div>';d.querySelector("span").textContent=c;ch.appendChild(d)});
+var L=$("list");L.innerHTML="";
+if(!rows.length)L.innerHTML='<div class="empty">ဒီလအတွက် မှတ်တမ်း မရှိသေးပါ။ အပေါ်က ဖောင်မှာ ထည့်ပါ။</div>';
+rows.forEach(function(x){var d=document.createElement("div");d.className="item";
+d.innerHTML='<div><span class="t"></span><small></small></div><div style="display:flex;align-items:center"><span class="amt '+x.type+'"></span><button class="del" aria-label="ဖျက်မယ်">×</button></div>';
+d.querySelector(".t").textContent=x.cat;
+d.querySelector("small").textContent=x.date.slice(5).replace("-","/")+(x.note?" - "+x.note:"");
+d.querySelector(".amt").textContent=(x.type==="income"?"+":"-")+yen(x.amount);
+d.querySelector(".del").onclick=function(){if(confirm("ဒီမှတ်တမ်းကို ဖျက်မလား?")){data=data.filter(function(y){return y.id!==x.id});save();render()}};
+L.appendChild(d)})}
+$("add").onclick=function(){
+var a=parseFloat($("amount").value);
+if(!(a>0)){$("amount").focus();return}
+var dt=$("date").value||today();
+data.push({id:Date.now(),type:type,amount:a,cat:$("cat").value,note:$("note").value.trim(),date:dt});
+save();$("amount").value="";$("note").value="";$("month").value=dt.slice(0,7);render();$("amount").focus()};
+document.querySelectorAll(".seg button").forEach(function(b){b.onclick=function(){setType(b.dataset.t)}});
+$("month").onchange=render;
+load();$("date").value=today();$("month").value=today().slice(0,7);setType("expense");render();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
