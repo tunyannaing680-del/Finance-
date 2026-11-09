@@ -199,4 +199,41 @@ if(!cats.length)ch.innerHTML='<div class="empty">သုံးငွေ မရှ
 cats.forEach(function(c){var d=document.createElement("div");d.innerHTML='<div class="cat"><span></span><b>'+yen(by[c])+'</b></div><div class="track"><i style="width:'+Math.round(by[c]/tex*100)+'%"></i></div>';d.querySelector("span").textContent=c;ch.appendChild(d)});
 var L2=$("list");L2.innerHTML="";
 if(!rows.length&&!ph)L2.innerHTML='<div class="empty">ဒီလအတွက် မှတ်တမ်း မရှိသေးပါ။ အပေါ်က ဖောင်မှာ ထည့်ပါ။</div>';
-if(ph){var q=document.createElement("div");q.className="item";q.innerHTML='<div><span>ဟော်တယ်လ
+if(ph){var q=document.createElement("div");q.className="item";q.innerHTML='<div><span>ဟော်တယ်လုပ်ခ</span><small>ပြီးခဲ့တဲ့လ အလုပ်အတွက်</small></div><span class="amt income"></span>';q.querySelector(".amt").textContent="+"+yen(ph);L2.appendChild(q)}
+rows.forEach(function(x){var d=document.createElement("div");d.className="item";
+d.innerHTML='<div><span class="t"></span><small></small></div><div style="display:flex;align-items:center"><span class="amt '+x.type+'"></span><button class="del" aria-label="ဖျက်မယ်">×</button></div>';
+d.querySelector(".t").textContent=x.type==="hotel"?"ဟော်တယ်":x.cat;
+d.querySelector("small").textContent=x.date.slice(5).replace("-","/")+(x.type==="hotel"?", "+roomText(x):"")+(x.note?" - "+x.note:"");
+d.querySelector(".amt").textContent=x.type==="hotel"?yen(x.amount)+" (နောက်လ)":(x.type==="income"?"+":"-")+yen(x.amount);
+d.querySelector(".del").onclick=function(){if(confirm("ဒီမှတ်တမ်းကို ဖျက်မလား?")){data=data.filter(function(y){return y.id!==x.id});sv(KEY,data);render()}};
+L2.appendChild(d)})}
+$("add").onclick=function(){
+var dt=$("date").value||today(),note=$("note").value.trim();
+if(type==="hotel"){
+var dup=data.some(function(x){return x.type==="hotel"&&x.date===dt});
+if(dup&&!confirm("ဒီရက်အတွက် ဟော်တယ်မှတ်တမ်း ရှိပြီးသားပါ။ ထပ်ထည့်မလား?"))return;
+var rm=rd();
+data.push({id:Date.now(),type:"hotel",amount:calc(rm,rates),cat:"ဟော်တယ်",note:note,date:dt,rooms:rm,hours:num("hrs"),rates:Object.assign({},rates)});
+["rs","rt","rus","rut","hrs"].forEach(function(i){$(i).value=""});upd();
+}else{
+var a=parseFloat($("amount").value);
+if(!(a>0)){$("amount").focus();return}
+data.push({id:Date.now(),type:type,amount:a,cat:$("cat").value,note:note,date:dt});
+$("amount").value=""}
+$("note").value="";sv(KEY,data);$("month").value=dt.slice(0,7);render()};
+document.querySelectorAll(".seg button").forEach(function(b){b.onclick=function(){setType(b.dataset.t)}});
+["rs","rt","rus","rut"].forEach(function(i){$(i).oninput=upd});
+var RM={r1:"s",r2:"t",r3:"us",r4:"ut"};
+function fillRates(){Object.keys(RM).forEach(function(i){$(i).value=rates[RM[i]]})}
+$("rsave").onclick=function(){var r={};Object.keys(RM).forEach(function(i){r[RM[i]]=num(i)});rates=r;sv(RK,rates);upd();alert("နှုန်းထား သိမ်းပြီးပါပြီ")};
+$("psave").onclick=function(){var m=$("month").value;pay[m]={g:num("pg")};sv(PK,pay);render()};
+$("month").onchange=render;
+data=ld(KEY,[]);if(!Array.isArray(data))data=[];
+rates=Object.assign({},DEF,ld(RK,{}));pay=ld(PK,{});
+fillRates();
+$("date").value=today();$("month").value=today().slice(0,7);setType("expense");render();
+})();
+</script>
+<script>if("serviceWorker" in navigator){var rf=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(rf)return;rf=true;location.reload()});window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
